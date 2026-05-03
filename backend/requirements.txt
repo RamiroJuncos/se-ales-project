@@ -1,5 +1,3 @@
 fastapi
 uvicorn[standard]
-websocket-client
 requests
-git+https://github.com/iqoptionapi/iqoptionapi.git

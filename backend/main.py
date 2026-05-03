@@ -71,9 +71,9 @@ def obtener_senal(usuario: str):
             señal = "🔘 ESPERAR"
 
         return {
-            "senal": señal,
-            "precio": precio,
-            "hora": datetime.now().strftime("%H:%M:%S")
+           "senal": "🟢 ARRIBA",
+            "precio": 1.2345,
+            "hora": "12:00:00"
         }
 
     except Exception as e:
