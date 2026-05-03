@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Señales</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 350px;
+      background: #161b22;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      background: #0d1117;
+      color: white;
+    }
+
+    button {
+      width: 95%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #238636;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #2ea043;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #8b949e;
+    }
+
+    .signal-box {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      background: #0d1117;
+    }
+
+    .signal {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .price {
+      font-size: 18px;
+    }
+
+    .time {
+      font-size: 14px;
+      color: #8b949e;
+    }
+
+    .green { color: #3fb950; }
+    .red { color: #f85149; }
+    .neutral { color: #e6edf3; }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>📊 Señales</h1>
+
+  <input id="user" placeholder="Usuario">
+  <input id="pass" type="password" placeholder="Contraseña">
+
+  <label>
+    Cuenta Demo
+    <input type="checkbox" id="demo" checked>
+  </label>
+
+  <button onclick="login()">CONECTAR</button>
+
+  <div class="status" id="estado">Desconectado</div>
+
+  <div class="signal-box">
+    <div class="time" id="hora">--:--:--</div>
+    <div class="signal neutral" id="senal">Esperando...</div>
+    <div class="price" id="precio">--</div>
+  </div>
+
+</div>
+
+<script>
+let usuario = "";
+const API_URL = "https://TUAPP.up.railway.app"; //
+
+async function login(){
+  const user = document.getElementById("user").value;
+  const pass = document.getElementById("pass").value;
+  const demo = document.getElementById("demo").checked;
+
+  document.getElementById("estado").innerText = "Conectando...";
+
+  try{
+    const res = await fetch(API_URL + "/login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        usuario: user,
+        clave: pass,
+        cuenta_demo: demo
+      })
+    });
+
+    const data = await res.json();
+
+    if(data.error){
+      document.getElementById("estado").innerText = "❌ " + data.error;
+      return;
+    }
+
+    usuario = user;
+    document.getElementById("estado").innerText = "✅ Conectado";
+
+    setInterval(cargar, 5000);
+    cargar();
+
+  }catch(e){
+    document.getElementById("estado").innerText = "❌ Error de conexión";
+  }
+}
+
+async function cargar(){
+  if(!usuario) return;
+
+  try{
+    const res = await fetch(`${API_URL}/senal?usuario=${usuario}`);
+    const data = await res.json();
+
+    const señal = document.getElementById("senal");
+
+    if(data.error){
+      señal.innerText = "ERROR";
+      señal.className = "signal neutral";
+      return;
+    }
+
+    señal.innerText = data.senal;
+
+    if(data.senal.includes("ARRIBA")){
+      señal.className = "signal green";
+    } else if(data.senal.includes("ABAJO")){
+      señal.className = "signal red";
+    } else {
+      señal.className = "signal neutral";
+    }
+
+    document.getElementById("precio").innerText = "Precio: " + data.precio;
+    document.getElementById("hora").innerText = data.hora;
+
+  }catch(e){
+    document.getElementById("senal").innerText = "SIN CONEXIÓN";
+  }
+}
+</script>
+
+</body>
+</html>
